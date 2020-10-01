@@ -7,6 +7,9 @@ ROOT="./packages"
 REPOSITORY_TYPE="github"
 CIRCLE_API="https://circleci.com/api"
 
+# any folder matching this will be skipped
+SKIPPED_FOLDERS_REGEX=""
+
 ############################################
 ## 1. Commit SHA of last CI build
 ############################################
@@ -74,6 +77,11 @@ echo "Workflows currently in failed status: (${FAILED_WORKFLOWS[@]})."
 
 for PACKAGE in ${PACKAGES[@]}
 do
+  # skip folders
+  if [[ -n $SKIPPED_FOLDERS_REGEX ]] && [[ $PACKAGE =~ $SKIPPED_FOLDERS_REGEX ]]; then
+    continue
+  fi
+
   PACKAGE_PATH=${ROOT#.}/$PACKAGE
   LATEST_COMMIT_SINCE_LAST_BUILD=$(git log -1 $LAST_COMPLETED_BUILD_SHA..$CIRCLE_SHA1 --format=format:%H --full-diff ${PACKAGE_PATH#/})
 
